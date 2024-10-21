@@ -39,7 +39,6 @@ func GetProductsByCategory(c *fiber.Ctx) error {
 		"message":  "get products successfully",
 		"products": products,
 	})
-
 }
 
 func CreateProduct(c *fiber.Ctx) error {

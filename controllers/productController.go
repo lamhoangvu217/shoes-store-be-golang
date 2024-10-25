@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
+	"gorm.io/gorm"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -64,8 +66,45 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 	if err := database.DB.Create(&product).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create product",
+			"error": err.Error(),
+			"json":  product,
 		})
 	}
 	return c.Status(fiber.StatusCreated).JSON(product)
+}
+
+func DeleteProduct(c *fiber.Ctx) error {
+	productIdStr := c.Params("id")
+	if productIdStr == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "product id is required",
+		})
+	}
+	// Convert product id from string to uint
+	productId, err := strconv.ParseUint(productIdStr, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid productId",
+		})
+	}
+	var product models.Product
+	if err := database.DB.First(&product, productId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "product id not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "could not retrieve product",
+		})
+	}
+
+	if err := database.DB.Delete(&product, productId).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(fiber.Map{
+		"message": "delete product successfully",
+	})
 }

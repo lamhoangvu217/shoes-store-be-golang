@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
+	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -106,5 +107,75 @@ func DeleteProduct(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{
 		"message": "delete product successfully",
+	})
+}
+
+func UpdateProduct(c *fiber.Ctx) error {
+	productIdStr := c.Params("id")
+	if productIdStr == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "product id is required",
+		})
+	}
+	// Convert product id from string to uint
+	productId, err := strconv.ParseUint(productIdStr, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid productId",
+		})
+	}
+	var product models.Product
+	if err := database.DB.First(&product, productId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "product id not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "could not retrieve product",
+		})
+	}
+	var updateProductData models.Product
+	if err := c.BodyParser(&updateProductData); err != nil {
+		// Return 400 if request body is invalid
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+	if updateProductData.Name == "" || len(updateProductData.Name) < 3 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Product name is required and must be at least 3 characters long",
+		})
+	}
+	if updateProductData.OriginalPrice <= 0 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Original price must be greater than zero",
+		})
+	}
+	if updateProductData.SalePrice <= 0 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Sale price must be greater than zero",
+		})
+	}
+	if updateProductData.CategoryID == 0 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Category ID is required",
+		})
+	}
+	// Update the product fields
+	product.Name = updateProductData.Name
+	product.OriginalPrice = updateProductData.OriginalPrice
+	product.SalePrice = updateProductData.SalePrice
+	product.Description = updateProductData.Description
+	product.CategoryID = updateProductData.CategoryID
+	if err := database.DB.Save(&product).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Product updated successfully",
+		"product": product,
 	})
 }

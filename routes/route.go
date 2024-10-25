@@ -15,5 +15,12 @@ func Setup(app *fiber.App) {
 	admin.Post("/category", controllers.CreateCategory)
 	admin.Delete("/product/:id", controllers.DeleteProduct)
 	admin.Delete("/category/:id", controllers.DeleteCategory)
+	admin.Put("/product/:id", controllers.UpdateProduct)
+	admin.Put("/category/:id", controllers.UpdateCategory)
 
+	app.Post("/api/register", controllers.Register)
+	app.Post("/api/login", controllers.Login)
+	app.Post("/api/logout", controllers.Logout)
+
+	app.Post("/api/create-order", controllers.CreateOrder)
 }

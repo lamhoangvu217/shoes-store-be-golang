@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"gorm.io/gorm"
+	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -92,8 +93,9 @@ func DeleteCategory(c *fiber.Ctx) error {
 			"error": "could not retrieve product",
 		})
 	}
+	var product = models.Product{}
 	var productCount int64
-	if err := database.DB.Model(&models.Product{}).Where("category_id = ?", categoryId).Count(&productCount).Error; err != nil {
+	if err := database.DB.Model(&product).Where("category_id = ?", categoryId).Count(&productCount).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -111,5 +113,54 @@ func DeleteCategory(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{
 		"message": "delete category successfully",
+	})
+}
+func UpdateCategory(c *fiber.Ctx) error {
+	categoryIdStr := c.Params("id")
+	if categoryIdStr == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "category id is required",
+		})
+	}
+	// Convert product id from string to uint
+	categoryId, err := strconv.ParseUint(categoryIdStr, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid category id",
+		})
+	}
+	var category models.Category
+	if err := database.DB.First(&category, categoryId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "category id not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "could not retrieve product",
+		})
+	}
+	var updateCategoryData models.Category
+	if err := c.BodyParser(&updateCategoryData); err != nil {
+		// Return 400 if request body is invalid
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+	if updateCategoryData.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Category name is required",
+		})
+	}
+	category.Name = updateCategoryData.Name
+	if err := database.DB.Save(&category).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message":  "Category updated successfully",
+		"category": category,
 	})
 }

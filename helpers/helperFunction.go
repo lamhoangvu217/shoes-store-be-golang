@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"github.com/lamhoangvu217/shoes-store-be-golang/constants"
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
@@ -20,4 +21,7 @@ func GetValidationErrorMessage(err validator.FieldError) string {
 	default:
 		return err.Field() + " is invalid"
 	}
+}
+func IsValidOrderStatus(status string) bool {
+	return status == constants.OrderStatusPending || status == constants.OrderStatusCompleted || status == constants.OrderStatusCancelled
 }

@@ -34,10 +34,10 @@ func CreateOrder(c *fiber.Ctx) error {
 			"error": "could not retrieve product",
 		})
 	}
-	var orderStatus = order.OrderStatus
-	if err := helpers.IsValidOrderStatus(orderStatus); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "order status is invalid",
+	// Validate the order status
+	if !helpers.IsValidOrderStatus(order.OrderStatus) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Order status is invalid",
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

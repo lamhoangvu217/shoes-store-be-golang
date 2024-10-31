@@ -17,11 +17,7 @@ func CreateOrder(c *fiber.Ctx) error {
 			"error": "Invalid order request body",
 		})
 	}
-	if err := database.DB.Create(&order).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"err": err.Error(),
-		})
-	}
+	// validate product id
 	var productId = order.ProductID
 	var product models.Product
 	if err := database.DB.First(&product, productId).Error; err != nil {
@@ -38,6 +34,33 @@ func CreateOrder(c *fiber.Ctx) error {
 	if !helpers.IsValidOrderStatus(order.OrderStatus) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Order status is invalid",
+		})
+	}
+
+	// Validate user
+	var userId = order.UserID
+	var user models.User
+	if err := database.DB.First(&user, userId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "user id not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "could not retrieve product",
+		})
+	}
+
+	// validate quantity
+	var quantity = order.Quantity
+	if quantity < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Quantity is not smaller than 1",
+		})
+	}
+	if err := database.DB.Create(&order).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"err": err.Error(),
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

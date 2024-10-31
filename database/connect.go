@@ -13,6 +13,7 @@ import (
 var DB *gorm.DB
 
 func Connect() {
+	log.Println("env", os.Getenv("ENV"))
 	if os.Getenv("ENV") != "production" {
 		err := godotenv.Load(".env.local")
 		if err != nil {

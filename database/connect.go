@@ -18,6 +18,11 @@ func Connect() {
 		if err != nil {
 			log.Fatal("Error loading .env.local file")
 		}
+	} else {
+		err := godotenv.Load(".env.production")
+		if err != nil {
+			log.Fatal("Error loading .env.production file")
+		}
 	}
 	dsn := os.Getenv("DSN")
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

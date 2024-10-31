@@ -13,6 +13,7 @@ func Setup(app *fiber.App) {
 	admin := app.Group("/admin")
 	admin.Post("/product", controllers.CreateProduct)
 	admin.Post("/category", controllers.CreateCategory)
+	admin.Post("/post", controllers.CreatePost)
 	admin.Delete("/product/:id", controllers.DeleteProduct)
 	admin.Delete("/category/:id", controllers.DeleteCategory)
 	admin.Put("/product/:id", controllers.UpdateProduct)
@@ -23,4 +24,6 @@ func Setup(app *fiber.App) {
 	app.Post("/api/logout", controllers.Logout)
 
 	app.Post("/api/create-order", controllers.CreateOrder)
+	admin.Delete("/post/:id", controllers.DeletePost)
+	app.Get("/api/posts", controllers.GetPosts)
 }

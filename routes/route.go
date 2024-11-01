@@ -13,6 +13,9 @@ func Setup(app *fiber.App) {
 
 	app.Get("/api/category/:id", controllers.GetCategoryById)
 	app.Get("/api/post/:id", controllers.GetPostById)
+	app.Get("/api/product/:id", controllers.GetProductById)
+	app.Get("/api/product-images", controllers.GetProductImages)
+	app.Get("/api/product-images-by-product-id", controllers.GetProductImagesByProductId)
 	app.Post("/api/register", controllers.Register)
 	app.Post("/api/login", controllers.Login)
 	app.Post("/api/logout", controllers.Logout)
@@ -23,10 +26,13 @@ func Setup(app *fiber.App) {
 	admin.Post("/product", controllers.CreateProduct)
 	admin.Post("/category", controllers.CreateCategory)
 	admin.Post("/post", controllers.CreatePost)
+	admin.Post("/product-image", controllers.CreateProductImagesGallery)
 	admin.Delete("/product/:id", controllers.DeleteProduct)
 	admin.Delete("/category/:id", controllers.DeleteCategory)
 	admin.Delete("/post/:id", controllers.DeletePost)
+	admin.Delete("/product-image/:id", controllers.DeleteProductImage)
 	admin.Put("/product/:id", controllers.UpdateProduct)
 	admin.Put("/category/:id", controllers.UpdateCategory)
 	admin.Put("/post/:id", controllers.UpdatePost)
+	admin.Put("/product-image/:id", controllers.UpdateProductImage)
 }

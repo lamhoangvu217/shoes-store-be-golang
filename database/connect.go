@@ -39,5 +39,6 @@ func Connect() {
 		&models.User{},
 		&models.Order{},
 		&models.Post{},
+		&models.ProductImage{},
 	)
 }

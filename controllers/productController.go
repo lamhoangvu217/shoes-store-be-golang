@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"github.com/lamhoangvu217/shoes-store-be-golang/services"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
@@ -31,9 +32,9 @@ func GetProductsByCategory(c *fiber.Ctx) error {
 			"error": "invalid categoryId",
 		})
 	}
-	var products []models.Product
-	// Fetch products belonging to the specified category
-	if err := database.DB.Where("category_id = ?", categoryId).Preload("Category").Find(&products).Error; err != nil {
+	// Call the service to get products by category
+	products, err := services.GetProductsByCategory(uint(categoryId))
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -58,8 +59,8 @@ func GetProductById(c *fiber.Ctx) error {
 			"error": "invalid categoryId",
 		})
 	}
-	var product models.Product
-	if err := database.DB.First(&product, productId).Error; err != nil {
+	product, err := services.GetProductById(uint(productId))
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})

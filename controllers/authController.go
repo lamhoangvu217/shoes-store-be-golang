@@ -90,10 +90,11 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 	cookie := fiber.Cookie{
-		Name:     "jwt",
+		Name:     "access_token",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
+		SameSite: "None",
 	}
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{
@@ -105,7 +106,7 @@ func Login(c *fiber.Ctx) error {
 func Logout(c *fiber.Ctx) error {
 	// Create a cookie with the same name as the JWT cookie but set its expiry time in the past
 	cookie := fiber.Cookie{
-		Name:     "jwt",
+		Name:     "access_token",
 		Value:    "",
 		Expires:  time.Now().Add(-time.Hour), // Set expiry to the past to delete the cookie
 		HTTPOnly: true,

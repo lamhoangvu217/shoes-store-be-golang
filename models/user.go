@@ -4,7 +4,7 @@ import "golang.org/x/crypto/bcrypt"
 
 type User struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	Email    string `gorm:"not null" json:"email"`
+	Email    string `gorm:"unique;not null" json:"email"`
 	FullName string `gorm:"size:255;not null" json:"fullName"`
 	Password []byte `gorm:"not null" json:"password" validate:"required,min=8"`
 }

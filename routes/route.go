@@ -10,7 +10,7 @@ func Setup(app *fiber.App) {
 	app.Get("/api/categories", controllers.GetCategories)
 	app.Get("/api/products", controllers.GetProductsByCategory)
 	app.Get("/api/posts", controllers.GetPosts)
-	app.Get("/api/user-detail", controllers.GetUserDetail)
+	app.Get("/api/user-detail", middlewares.AuthRequired, controllers.GetUserDetail)
 
 	app.Get("/api/category/:id", controllers.GetCategoryById)
 	app.Get("/api/post/:id", controllers.GetPostById)

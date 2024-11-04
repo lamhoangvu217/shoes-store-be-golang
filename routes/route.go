@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lamhoangvu217/shoes-store-be-golang/controllers"
+	"github.com/lamhoangvu217/shoes-store-be-golang/middlewares"
 )
 
 func Setup(app *fiber.App) {
@@ -22,7 +23,7 @@ func Setup(app *fiber.App) {
 
 	app.Post("/api/create-order", controllers.CreateOrder)
 
-	admin := app.Group("/admin")
+	admin := app.Group("/admin", middlewares.AuthRequired)
 	admin.Post("/product", controllers.CreateProduct)
 	admin.Post("/category", controllers.CreateCategory)
 	admin.Post("/post", controllers.CreatePost)
